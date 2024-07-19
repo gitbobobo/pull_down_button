@@ -126,17 +126,40 @@ class _MenuActionButtonState extends State<MenuActionButton> {
           onTapUp: onTapUp,
           onTapCancel: onTapCancel,
           behavior: HitTestBehavior.opaque,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: isPressed
-                  ? widget.pressedColor
-                  : isHovered
-                      ? widget.hoverColor
-                      : null,
-            ),
-            child: MenuActionButtonState(
-              isHovered: isHovered && !isPressed,
-              child: widget.child,
+          child: Focus(
+            onFocusChange: (hasFocus) {
+              if (enabled && hasFocus) {
+                setState(() {
+                  isHovered = true;
+                });
+              } else {
+                setState(() {
+                  isHovered = false;
+                });
+              }
+            },
+            onKeyEvent: (node, event) {
+              if (event is KeyUpEvent && isHovered) {
+                if (event.logicalKey == LogicalKeyboardKey.select ||
+                    event.logicalKey == LogicalKeyboardKey.enter) {
+                  onTap();
+                  return KeyEventResult.handled;
+                }
+              }
+              return KeyEventResult.ignored;
+            },
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: isPressed
+                    ? widget.pressedColor
+                    : isHovered
+                        ? widget.hoverColor
+                        : null,
+              ),
+              child: MenuActionButtonState(
+                isHovered: isHovered && !isPressed,
+                child: widget.child,
+              ),
             ),
           ),
         ),
